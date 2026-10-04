@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api/client';
 import { errorMessage, unwrap } from '@/lib/api/errors';
 import { useAuth } from '@/lib/auth/auth-provider';
+import { useWorkspace } from '@/lib/workspace/workspace-provider';
 import { describeDevice, formatRelative } from './session-format';
 
 export function AccountOverview() {
@@ -28,12 +29,41 @@ export function AccountOverview() {
 
       {!user.emailVerified && <VerifyEmailNotice email={user.email} />}
 
-      <p className="text-text-muted border-border mt-8 border-t pt-6">
-        Your workspace, inbox and AI agent will show up here as they ship.
-      </p>
+      <WorkspaceSummary />
 
       <SessionList />
     </main>
+  );
+}
+
+function WorkspaceSummary() {
+  const { current, workspaces, switchTo } = useWorkspace();
+  if (!current) return null;
+
+  return (
+    <section className="border-border mt-8 border-t pt-6" aria-labelledby="workspace-heading">
+      <h2 id="workspace-heading" className="text-base font-semibold">
+        {current.name}
+      </h2>
+      <p className="text-text-muted mt-1 text-[13px]">
+        Your role here: {current.role.name}. The inbox and AI agent will show up in this workspace
+        as they ship.
+      </p>
+
+      {workspaces.length > 1 && (
+        <ul className="mt-4 flex flex-wrap gap-2" aria-label="Switch workspace">
+          {workspaces
+            .filter((w) => w.id !== current.id)
+            .map((w) => (
+              <li key={w.id}>
+                <Button size="sm" variant="outline" onClick={() => switchTo(w.id)}>
+                  Switch to {w.name}
+                </Button>
+              </li>
+            ))}
+        </ul>
+      )}
+    </section>
   );
 }
 
