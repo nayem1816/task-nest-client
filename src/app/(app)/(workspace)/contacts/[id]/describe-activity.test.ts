@@ -27,7 +27,15 @@ describe('describeActivity', () => {
       'Tom Becker added VIP and removed Newsletter and Gift order',
     ],
     [a('note.added', { excerpt: 'Prefers whole bean' }), 'Tom Becker added a note'],
-    [a('order.placed'), 'order.placed'],
+    [
+      a('order.placed', { number: 10482, totalCents: 6150, currency: 'USD' }),
+      'Placed order #10482 for $61.50',
+    ],
+    [
+      a('order.status_changed', { number: 10482, from: 'PAID', to: 'SHIPPED' }),
+      'Order #10482 is now shipped',
+    ],
+    [a('lead.created'), 'lead.created'],
   ])('%#', (input, expected) => {
     expect(describeActivity(input)).toBe(expected);
   });
