@@ -1,4 +1,4 @@
-import { formatExpiry } from './format';
+import { formatExpiry, formatRelative } from './format';
 
 describe('formatExpiry', () => {
   const now = Date.parse('2026-10-04T12:00:00Z');
@@ -11,5 +11,20 @@ describe('formatExpiry', () => {
     ['2026-10-04T11:00:00Z', 'expired'],
   ])('%s → %s', (iso, expected) => {
     expect(formatExpiry(iso, now)).toBe(expected);
+  });
+});
+
+describe('formatRelative', () => {
+  const now = Date.parse('2026-10-04T12:00:00Z');
+
+  it.each([
+    ['2026-10-04T11:59:30Z', 'just now'],
+    ['2026-10-04T11:47:00Z', '13 min ago'],
+    ['2026-10-04T07:00:00Z', '5 h ago'],
+    ['2026-10-03T09:00:00Z', 'yesterday'],
+    ['2026-09-28T12:00:00Z', '6 days ago'],
+    ['2026-08-01T12:00:00Z', 'Aug 1, 2026'],
+  ])('%s → %s', (iso, expected) => {
+    expect(formatRelative(iso, now)).toBe(expected);
   });
 });

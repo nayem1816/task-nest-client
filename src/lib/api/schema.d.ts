@@ -501,6 +501,148 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Contacts, newest first, with search and filters */
+        get: operations["ContactsController_list_v1"];
+        put?: never;
+        /** Add a contact by hand */
+        post: operations["ContactsController_create_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One contact with tags and channel identities */
+        get: operations["ContactsController_get_v1"];
+        put?: never;
+        post?: never;
+        /** Delete a contact with its notes and history */
+        delete: operations["ContactsController_remove_v1"];
+        options?: never;
+        head?: never;
+        /** Edit contact details; send null or "" to clear a field */
+        patch: operations["ContactsController_update_v1"];
+        trace?: never;
+    };
+    "/api/v1/contacts/{id}/tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set exactly which tags a contact has */
+        put: operations["ContactsController_setTags_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{id}/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The contact's timeline, newest first */
+        get: operations["ContactsController_listActivity_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{id}/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Internal notes about the contact, newest first */
+        get: operations["ContactsController_listNotes_v1"];
+        put?: never;
+        /** Add an internal note. Customers never see notes. */
+        post: operations["ContactsController_addNote_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{id}/notes/{noteId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a note you wrote (or any note with contact.delete) */
+        delete: operations["ContactsController_removeNote_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Tags in this workspace and how many contacts use each */
+        get: operations["TagsController_list_v1"];
+        put?: never;
+        /** Create a tag */
+        post: operations["TagsController_create_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tags/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a tag and remove it from every contact */
+        delete: operations["TagsController_remove_v1"];
+        options?: never;
+        head?: never;
+        /** Rename or recolor a tag */
+        patch: operations["TagsController_update_v1"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -613,6 +755,8 @@ export interface components {
             name: string;
         };
         MyOrganizationDto: {
+            /** @description Your membership in this workspace; matches `id` in the members list. */
+            memberId: string;
             /** @description Your role in this workspace. */
             role: components["schemas"]["MembershipRoleDto"];
             /** @description Permission keys your role grants, for showing or hiding UI. */
@@ -730,6 +874,145 @@ export interface components {
         };
         InvitationTokenDto: {
             token: string;
+        };
+        TagDto: {
+            id: string;
+            name: string;
+            color: string;
+        };
+        ContactDto: {
+            id: string;
+            /** @description Name, or email, or phone: whatever identifies the contact best. */
+            displayName: string;
+            name: string | null;
+            email: string | null;
+            phone: string | null;
+            company: string | null;
+            location: string | null;
+            /** @enum {string} */
+            stage: "VISITOR" | "LEAD" | "CUSTOMER";
+            /** Format: date-time */
+            lastSeenAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            tags: components["schemas"]["TagDto"][];
+        };
+        ContactPageDto: {
+            data: components["schemas"]["ContactDto"][];
+            nextCursor: string | null;
+        };
+        CreateContactDto: {
+            tagIds?: string[];
+            /** @example Sarah Mitchell */
+            name?: string | null;
+            /**
+             * Format: email
+             * @example sarah.mitchell@gmail.com
+             */
+            email?: string | null;
+            /**
+             * @description Any format people type; stored as entered.
+             * @example +1 512 555 0143
+             */
+            phone?: string | null;
+            company?: string | null;
+            /** @example Austin, TX */
+            location?: string | null;
+            /** @enum {string} */
+            stage?: "VISITOR" | "LEAD" | "CUSTOMER";
+        };
+        ContactIdentityDto: {
+            /** @enum {string} */
+            channel: "EMAIL" | "PHONE" | "WEBSITE_CHAT" | "TELEGRAM" | "WHATSAPP" | "MESSENGER" | "INSTAGRAM";
+            externalId: string;
+        };
+        ContactDetailDto: {
+            id: string;
+            /** @description Name, or email, or phone: whatever identifies the contact best. */
+            displayName: string;
+            name: string | null;
+            email: string | null;
+            phone: string | null;
+            company: string | null;
+            location: string | null;
+            /** @enum {string} */
+            stage: "VISITOR" | "LEAD" | "CUSTOMER";
+            /** Format: date-time */
+            lastSeenAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            tags: components["schemas"]["TagDto"][];
+            identities: components["schemas"]["ContactIdentityDto"][];
+            noteCount: number;
+        };
+        UpdateContactDto: {
+            /** @example Sarah Mitchell */
+            name?: string | null;
+            /**
+             * Format: email
+             * @example sarah.mitchell@gmail.com
+             */
+            email?: string | null;
+            /**
+             * @description Any format people type; stored as entered.
+             * @example +1 512 555 0143
+             */
+            phone?: string | null;
+            company?: string | null;
+            /** @example Austin, TX */
+            location?: string | null;
+            /** @enum {string} */
+            stage?: "VISITOR" | "LEAD" | "CUSTOMER";
+        };
+        SetContactTagsDto: {
+            tagIds: string[];
+        };
+        ActivityDto: {
+            id: string;
+            type: string;
+            actorLabel: string | null;
+            metadata: {
+                [key: string]: unknown;
+            } | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        ActivityPageDto: {
+            data: components["schemas"]["ActivityDto"][];
+            nextCursor: string | null;
+        };
+        NoteDto: {
+            id: string;
+            body: string;
+            author: {
+                id: string;
+                name: string;
+            };
+            /** Format: date-time */
+            createdAt: string;
+        };
+        NotePageDto: {
+            data: components["schemas"]["NoteDto"][];
+            nextCursor: string | null;
+        };
+        CreateNoteDto: {
+            body: string;
+        };
+        TagWithUsageDto: {
+            id: string;
+            name: string;
+            color: string;
+            contactCount: number;
+        };
+        CreateTagDto: {
+            name: string;
+            /** @enum {string} */
+            color?: "slate" | "blue" | "green" | "amber" | "red" | "violet" | "teal" | "pink";
+        };
+        UpdateTagDto: {
+            name?: string;
+            /** @enum {string} */
+            color?: "slate" | "blue" | "green" | "amber" | "red" | "violet" | "teal" | "pink";
         };
     };
     responses: never;
@@ -1578,6 +1861,429 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["MyOrganizationDto"];
                 };
+            };
+        };
+    };
+    ContactsController_list_v1: {
+        parameters: {
+            query: {
+                /** @description Matches name, email, phone or company. */
+                search?: string;
+                stage?: "VISITOR" | "LEAD" | "CUSTOMER";
+                tagId?: string;
+                cursor?: string;
+                limit: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactPageDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `contact.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContactsController_create_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateContactDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactDetailDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `contact.update` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description `CONTACT_EMAIL_TAKEN`, with the existing contact id */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContactsController_get_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactDetailDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `contact.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContactsController_remove_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `contact.delete` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContactsController_update_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateContactDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactDetailDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `contact.update` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContactsController_setTags_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetContactTagsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactDetailDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `contact.update` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContactsController_listActivity_v1: {
+        parameters: {
+            query: {
+                cursor?: string;
+                limit: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityPageDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `contact.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContactsController_listNotes_v1: {
+        parameters: {
+            query: {
+                cursor?: string;
+                limit: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotePageDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `contact.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContactsController_addNote_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateNoteDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoteDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `contact.update` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContactsController_removeNote_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                noteId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `contact.update` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TagsController_list_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TagWithUsageDto"][];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `contact.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TagsController_create_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTagDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TagDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `contact.update` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TagsController_remove_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `contact.delete` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TagsController_update_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTagDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TagDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `contact.update` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
