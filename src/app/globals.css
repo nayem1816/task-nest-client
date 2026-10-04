@@ -1,0 +1,56 @@
+@import 'tailwindcss';
+
+/*
+ * Base tokens. The full component layer arrives with the design system; these
+ * are the values everything else is built from.
+ */
+:root {
+  --surface: #ffffff;
+  --canvas: #f8fafc;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+
+  /* Sampled from the "Nest" half of the wordmark. */
+  --brand: #1467fb;
+  --brand-hover: #0f54d4;
+
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --info: #0284c7;
+  /* Reserved for AI-generated content and AI state only. */
+  --ai: #7c3aed;
+}
+
+@theme inline {
+  --color-surface: var(--surface);
+  --color-canvas: var(--canvas);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-border: var(--border);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --color-ai: var(--ai);
+
+  --font-sans: var(--font-inter);
+
+  --radius-control: 8px;
+  --radius-card: 10px;
+  --radius-panel: 12px;
+}
+
+body {
+  background: var(--canvas);
+  color: var(--text);
+  font-feature-settings: 'cv11', 'ss01';
+}
+
+/* Tables and metrics line up digit for digit. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
