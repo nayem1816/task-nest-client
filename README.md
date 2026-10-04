@@ -24,6 +24,23 @@ npm run dev          # http://localhost:3100
 The home page shows whether it can reach the API, which is the quickest way to
 confirm both sides are configured.
 
+## How it talks to the API
+
+The browser only ever calls `/api/v1/*` on this app's own origin. A Next.js
+rewrite forwards those requests to `API_ORIGIN`, so the refresh cookie is
+first-party and the app needs no CORS. `src/proxy.ts` adds the visitor's address
+and the shared `EDGE_PROXY_SECRET` so the API can rate limit per person rather
+than per web server.
+
+The access token is kept in memory only. On load the app exchanges the refresh
+cookie for a new one; on a 401 it refreshes once and replays the request.
+
+API types are generated from the server's OpenAPI document:
+
+```bash
+npm run api:types   # needs the API running on :4100
+```
+
 ## Scripts
 
 | Command             | What it does               |
@@ -33,3 +50,4 @@ confirm both sides are configured.
 | `npm run lint`      | ESLint (Next + TypeScript) |
 | `npm run typecheck` | `tsc --noEmit`             |
 | `npm run build`     | Production build           |
+| `npm run api:types` | Regenerate API types       |
