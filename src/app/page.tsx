@@ -1,4 +1,6 @@
 import Image from 'next/image';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import { getApiStatus, type ApiStatus } from '@/lib/api-status';
 
 // The marketing site replaces this page. Until then it doubles as a quick check
@@ -19,6 +21,14 @@ export default async function HomePage() {
           TaskNest is being built. The workspace, inbox and AI agent will appear here as each part
           ships.
         </p>
+      </div>
+      <div className="flex gap-2">
+        <Button asChild className="h-9">
+          <Link href="/signup">Create an account</Link>
+        </Button>
+        <Button asChild variant="outline" className="h-9">
+          <Link href="/login">Sign in</Link>
+        </Button>
       </div>
       <ApiStatusLine status={status} />
     </main>
