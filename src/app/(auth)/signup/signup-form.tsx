@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { GuestOnly } from '@/components/auth/guards';
@@ -29,9 +30,11 @@ type Values = z.infer<typeof schema>;
 
 export function SignupForm() {
   const { acceptSession } = useAuth();
+  const params = useSearchParams();
+  // Arriving from an invitation pre-fills the invited address.
   const form = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', email: '', password: '' },
+    defaultValues: { name: '', email: params.get('email') ?? '', password: '' },
   });
 
   const signup = useMutation({
@@ -43,7 +46,7 @@ export function SignupForm() {
   const emailTaken = signup.error instanceof ApiError && signup.error.code === 'EMAIL_TAKEN';
 
   return (
-    <GuestOnly>
+    <GuestOnly next={params.get('next') ?? undefined}>
       <form
         noValidate
         onSubmit={form.handleSubmit((values) => signup.mutate(values))}
