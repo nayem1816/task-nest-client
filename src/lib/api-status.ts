@@ -1,4 +1,4 @@
-import { env } from './env';
+import { serverEnv } from './env';
 
 export type ApiStatus =
   { state: 'ready' } | { state: 'degraded'; failing: string[] } | { state: 'unreachable' };
@@ -7,7 +7,7 @@ interface ReadinessBody {
   checks?: Record<string, 'up' | 'down'>;
 }
 
-export async function getApiStatus(baseUrl = env.NEXT_PUBLIC_API_URL): Promise<ApiStatus> {
+export async function getApiStatus(baseUrl = `${serverEnv.API_ORIGIN}/api/v1`): Promise<ApiStatus> {
   try {
     const res = await fetch(`${baseUrl}/health/ready`, {
       cache: 'no-store',
