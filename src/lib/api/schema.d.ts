@@ -643,6 +643,96 @@ export interface paths {
         patch: operations["TagsController_update_v1"];
         trace?: never;
     };
+    "/api/v1/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The catalogue, newest first */
+        get: operations["ProductsController_list_v1"];
+        put?: never;
+        /** Add a product */
+        post: operations["ProductsController_create_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/products/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ProductsController_get_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit a product, or archive it so it cannot be ordered */
+        patch: operations["ProductsController_update_v1"];
+        trace?: never;
+    };
+    "/api/v1/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Orders, newest first. Search by order number or customer. */
+        get: operations["OrdersController_list_v1"];
+        put?: never;
+        /**
+         * Record an order
+         * @description Prices come from the catalogue. Linking a contact makes them a customer.
+         */
+        post: operations["OrdersController_create_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orders/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** How much a contact has ordered and spent */
+        get: operations["OrdersController_summary_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["OrdersController_get_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update status, carrier, tracking number or delivery estimate */
+        patch: operations["OrdersController_update_v1"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1013,6 +1103,138 @@ export interface components {
             name?: string;
             /** @enum {string} */
             color?: "slate" | "blue" | "green" | "amber" | "red" | "violet" | "teal" | "pink";
+        };
+        ProductDto: {
+            id: string;
+            name: string;
+            sku: string | null;
+            description: string | null;
+            category: string | null;
+            priceCents: number;
+            currency: string;
+            stockQuantity: number | null;
+            /** @enum {string} */
+            status: "ACTIVE" | "ARCHIVED";
+            /** Format: date-time */
+            createdAt: string;
+        };
+        ProductPageDto: {
+            data: components["schemas"]["ProductDto"][];
+            nextCursor: string | null;
+        };
+        CreateProductDto: {
+            /** @example Ethiopia Guji, 12 oz */
+            name: string;
+            /** @example ETH-GUJI-12 */
+            sku?: string | null;
+            description?: string | null;
+            /** @example Coffee */
+            category?: string | null;
+            /**
+             * @description In cents.
+             * @example 1900
+             */
+            priceCents: number;
+            /**
+             * @description ISO 4217.
+             * @example USD
+             */
+            currency?: string;
+            /** @description Leave empty if stock is not tracked. */
+            stockQuantity?: number | null;
+        };
+        UpdateProductDto: {
+            name?: string;
+            sku?: string | null;
+            description?: string | null;
+            category?: string | null;
+            priceCents?: number;
+            stockQuantity?: number | null;
+            /** @enum {string} */
+            status?: "ACTIVE" | "ARCHIVED";
+        };
+        OrderContactDto: {
+            id: string;
+            displayName: string;
+            email: string | null;
+        };
+        OrderSummaryDto: {
+            id: string;
+            number: number;
+            /** @enum {string} */
+            status: "PENDING" | "PAID" | "FULFILLED" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "REFUNDED";
+            currency: string;
+            totalCents: number;
+            itemCount: number;
+            /** Format: date-time */
+            placedAt: string;
+            contact: components["schemas"]["OrderContactDto"] | null;
+        };
+        OrderPageDto: {
+            data: components["schemas"]["OrderSummaryDto"][];
+            /** @description Pass back as `cursor`; orders are listed newest number first. */
+            nextCursor: number | null;
+        };
+        CustomerOrdersSummaryDto: {
+            orderCount: number;
+            /** @description Paid, shipped or delivered orders only; refunds and cancellations excluded. */
+            totalSpentCents: number;
+            currency: string;
+            /** Format: date-time */
+            lastOrderAt: string | null;
+        };
+        OrderLineInputDto: {
+            /** Format: uuid */
+            productId: string;
+            quantity: number;
+        };
+        CreateOrderDto: {
+            /** Format: uuid */
+            contactId?: string;
+            items: components["schemas"]["OrderLineInputDto"][];
+            /** @description In cents. */
+            shippingCents?: number;
+            shippingAddress?: string | null;
+            /** @enum {string} */
+            status?: "PENDING" | "PAID" | "FULFILLED" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "REFUNDED";
+        };
+        OrderItemDto: {
+            id: string;
+            productId: string | null;
+            name: string;
+            sku: string | null;
+            unitPriceCents: number;
+            quantity: number;
+            totalCents: number;
+        };
+        OrderDto: {
+            id: string;
+            number: number;
+            /** @enum {string} */
+            status: "PENDING" | "PAID" | "FULFILLED" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "REFUNDED";
+            currency: string;
+            totalCents: number;
+            itemCount: number;
+            /** Format: date-time */
+            placedAt: string;
+            contact: components["schemas"]["OrderContactDto"] | null;
+            subtotalCents: number;
+            shippingCents: number;
+            shippingAddress: string | null;
+            carrier: string | null;
+            trackingNumber: string | null;
+            /** @description Calendar date, YYYY-MM-DD. */
+            estimatedDelivery: string | null;
+            items: components["schemas"]["OrderItemDto"][];
+        };
+        UpdateOrderDto: {
+            /** @enum {string} */
+            status?: "PENDING" | "PAID" | "FULFILLED" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "REFUNDED";
+            /** @example UPS */
+            carrier?: string | null;
+            trackingNumber?: string | null;
+            /** @example 2026-10-08 */
+            estimatedDelivery?: string | null;
         };
     };
     responses: never;
@@ -2279,6 +2501,279 @@ export interface operations {
                 };
             };
             /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `contact.update` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductsController_list_v1: {
+        parameters: {
+            query: {
+                search?: string;
+                status?: "ACTIVE" | "ARCHIVED";
+                cursor?: string;
+                limit: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductPageDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `commerce.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductsController_create_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateProductDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `commerce.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductsController_get_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `commerce.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductsController_update_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProductDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `commerce.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrdersController_list_v1: {
+        parameters: {
+            query: {
+                /** @description An order number ("10482" or "#10482"), or part of the customer's name or email. */
+                search?: string;
+                status?: "PENDING" | "PAID" | "FULFILLED" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "REFUNDED";
+                contactId?: string;
+                /** @description `nextCursor` from the previous page. */
+                cursor?: number;
+                limit: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderPageDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `commerce.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrdersController_create_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateOrderDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `commerce.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrdersController_summary_v1: {
+        parameters: {
+            query: {
+                contactId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerOrdersSummaryDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `commerce.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrdersController_get_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `commerce.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrdersController_update_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateOrderDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `commerce.manage` */
             403: {
                 headers: {
                     [name: string]: unknown;

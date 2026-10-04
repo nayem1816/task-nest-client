@@ -1,4 +1,12 @@
-import { BookUser, House, type LucideIcon, Settings, Users } from 'lucide-react';
+import {
+  BookUser,
+  House,
+  type LucideIcon,
+  Package,
+  Settings,
+  ShoppingBag,
+  Users,
+} from 'lucide-react';
 
 export interface NavItem {
   label: string;
@@ -24,6 +32,8 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Home', href: '/app', icon: House },
       { label: 'Contacts', href: '/contacts', icon: BookUser, permission: 'contact.read' },
+      { label: 'Orders', href: '/orders', icon: ShoppingBag, permission: 'commerce.read' },
+      { label: 'Products', href: '/products', icon: Package, permission: 'commerce.read' },
     ],
   },
   {

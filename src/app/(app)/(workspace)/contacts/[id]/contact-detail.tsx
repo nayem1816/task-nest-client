@@ -24,6 +24,7 @@ import { type ContactDetail, useContact, useContactActivity } from '@/lib/querie
 import { useWorkspaceKey } from '@/lib/queries/team';
 import { useWorkspace } from '@/lib/workspace/workspace-provider';
 import { ContactNotes } from './contact-notes';
+import { ContactOrders } from './contact-orders';
 import { describeActivity } from './describe-activity';
 import { TagPicker } from './tag-picker';
 
@@ -105,6 +106,7 @@ export function ContactDetailView({ id }: { id: string }) {
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="order-2 space-y-8 lg:order-1">
+          {can('commerce.read') && <ContactOrders contactId={c.id} />}
           {current && (
             <ContactNotes
               contactId={c.id}

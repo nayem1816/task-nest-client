@@ -1,3 +1,15 @@
+import { formatMoney } from '@/lib/money';
+
+const ORDER_STATUS: Record<string, string> = {
+  PENDING: 'pending payment',
+  PAID: 'paid',
+  FULFILLED: 'packed',
+  SHIPPED: 'shipped',
+  DELIVERED: 'delivered',
+  CANCELLED: 'cancelled',
+  REFUNDED: 'refunded',
+};
+
 const STAGES: Record<string, string> = { VISITOR: 'Visitor', LEAD: 'Lead', CUSTOMER: 'Customer' };
 const FIELDS: Record<string, string> = {
   name: 'name',
@@ -40,6 +52,15 @@ export function describeActivity({ type, actorLabel, metadata }: ActivityLike): 
     }
     case 'note.added':
       return `${who} added a note`;
+    case 'order.placed': {
+      const total =
+        typeof m.totalCents === 'number'
+          ? ` for ${formatMoney(m.totalCents, (m.currency as string) ?? 'USD')}`
+          : '';
+      return `Placed order #${String(m.number)}${total}`;
+    }
+    case 'order.status_changed':
+      return `Order #${String(m.number)} is now ${ORDER_STATUS[m.to as string] ?? String(m.to)}`;
     default:
       return type;
   }
