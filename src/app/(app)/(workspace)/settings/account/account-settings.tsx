@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api/client';
 import { errorMessage, unwrap } from '@/lib/api/errors';
 import { useAuth } from '@/lib/auth/auth-provider';
-import { describeDevice, formatRelative } from './session-format';
+import { formatRelative } from '@/lib/format';
+import { describeDevice } from './session-format';
 
 export function AccountSettings() {
   const { state } = useAuth();

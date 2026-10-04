@@ -32,3 +32,19 @@ export function formatExpiry(iso: string, now = Date.now()): string {
   const days = Math.round(hours / 24);
   return `in ${days} ${days === 1 ? 'day' : 'days'}`;
 }
+
+const MINUTE = 60_000;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+
+/** "just now", "13 min ago", "5 h ago", "yesterday", "6 days ago", then a date. */
+export function formatRelative(iso: string, now = Date.now()): string {
+  const diff = now - new Date(iso).getTime();
+  if (diff < MINUTE) return 'just now';
+  if (diff < HOUR) return `${Math.floor(diff / MINUTE)} min ago`;
+  if (diff < DAY) return `${Math.floor(diff / HOUR)} h ago`;
+  const days = Math.floor(diff / DAY);
+  if (days === 1) return 'yesterday';
+  if (days <= 30) return `${days} days ago`;
+  return formatDate(iso);
+}

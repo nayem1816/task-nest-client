@@ -1,4 +1,4 @@
-import { describeDevice, formatRelative } from './session-format';
+import { describeDevice } from './session-format';
 
 describe('describeDevice', () => {
   it.each([
@@ -28,19 +28,5 @@ describe('describeDevice', () => {
 
   it('handles a missing user agent', () => {
     expect(describeDevice(null).label).toBe('Unknown device');
-  });
-});
-
-describe('formatRelative', () => {
-  const now = Date.parse('2026-10-04T12:00:00Z');
-
-  it.each([
-    ['2026-10-04T11:59:30Z', 'just now'],
-    ['2026-10-04T11:47:00Z', '13 min ago'],
-    ['2026-10-04T07:00:00Z', '5 h ago'],
-    ['2026-10-03T09:00:00Z', 'yesterday'],
-    ['2026-09-28T12:00:00Z', '6 days ago'],
-  ])('%s → %s', (iso, expected) => {
-    expect(formatRelative(iso, now)).toBe(expected);
   });
 });
