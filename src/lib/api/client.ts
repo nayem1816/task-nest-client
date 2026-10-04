@@ -1,7 +1,10 @@
 import createClient from 'openapi-fetch';
 import { refreshSession } from '@/lib/auth/refresh';
 import { getAccessToken } from '@/lib/auth/token-store';
+import { getWorkspaceId } from '@/lib/workspace/workspace-store';
 import type { paths } from './schema';
+
+export const ORGANIZATION_HEADER = 'x-organization-id';
 
 const RETRYABLE_AUTH_CODES = new Set(['UNAUTHENTICATED', 'SESSION_EXPIRED']);
 
@@ -18,7 +21,7 @@ export function setSessionLostHandler(handler: () => void): void {
  */
 export async function authFetch(input: Request): Promise<Response> {
   const replay = input.clone();
-  const res = await fetch(withToken(input));
+  const res = await fetch(withContext(input));
   if (res.status !== 401 || input.url.includes('/api/v1/auth/')) return res;
 
   const code = await res
@@ -33,12 +36,17 @@ export async function authFetch(input: Request): Promise<Response> {
     onSessionLost();
     return res;
   }
-  return fetch(withToken(replay));
+  return fetch(withContext(replay));
 }
 
-function withToken(request: Request): Request {
+/** Attaches the access token and, unless the caller chose one, the current workspace. */
+function withContext(request: Request): Request {
   const token = getAccessToken();
   if (token) request.headers.set('Authorization', `Bearer ${token}`);
+  const workspace = getWorkspaceId();
+  if (workspace && !request.headers.has(ORGANIZATION_HEADER)) {
+    request.headers.set(ORGANIZATION_HEADER, workspace);
+  }
   return request;
 }
 

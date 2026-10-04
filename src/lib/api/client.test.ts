@@ -1,6 +1,7 @@
 import { refreshSession } from '@/lib/auth/refresh';
 import { setAccessToken } from '@/lib/auth/token-store';
-import { authFetch, setSessionLostHandler } from './client';
+import { setWorkspaceId } from '@/lib/workspace/workspace-store';
+import { authFetch, ORGANIZATION_HEADER, setSessionLostHandler } from './client';
 
 vi.mock('@/lib/auth/refresh', () => ({ refreshSession: vi.fn() }));
 
@@ -24,6 +25,21 @@ describe('authFetch', () => {
     await authFetch(request('/api/v1/auth/me'));
 
     expect(fetchMock.mock.calls[0]?.[0].headers.get('Authorization')).toBe('Bearer abc');
+  });
+
+  it('sends the current workspace unless the caller picked one', async () => {
+    setWorkspaceId('ws-current');
+    const fetchMock = vi.fn(async (_req: Request) => Response.json({}));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await authFetch(request('/api/v1/members'));
+    const explicit = request('/api/v1/members');
+    explicit.headers.set(ORGANIZATION_HEADER, 'ws-other');
+    await authFetch(explicit);
+
+    expect(fetchMock.mock.calls[0]?.[0].headers.get(ORGANIZATION_HEADER)).toBe('ws-current');
+    expect(fetchMock.mock.calls[1]?.[0].headers.get(ORGANIZATION_HEADER)).toBe('ws-other');
+    setWorkspaceId(null);
   });
 
   it('refreshes once and replays the request with the new token', async () => {

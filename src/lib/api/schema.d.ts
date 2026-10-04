@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/api/v1/audit-logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Who changed what in this workspace, newest first */
+        get: operations["AuditController_list_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/signup": {
         parameters: {
             query?: never;
@@ -217,6 +234,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Roles in this workspace and what each one allows */
+        get: operations["RolesController_list_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/permissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every permission a role can grant */
+        get: operations["RolesController_catalog_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health/live": {
         parameters: {
             query?: never;
@@ -251,10 +302,210 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/organizations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Workspaces you belong to, with your role in each */
+        get: operations["OrganizationsController_listMine_v1"];
+        put?: never;
+        /** Create a workspace; you become its owner */
+        post: operations["OrganizationsController_create_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The workspace selected by the organization header */
+        get: operations["OrganizationsController_current_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Rename the workspace or change its business type or time zone */
+        patch: operations["OrganizationsController_update_v1"];
+        trace?: never;
+    };
+    "/api/v1/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Everyone in this workspace, with role and teams */
+        get: operations["MembersController_list_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/members/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove someone from the workspace */
+        delete: operations["MembersController_remove_v1"];
+        options?: never;
+        head?: never;
+        /**
+         * Change a member’s role, or disable and re-enable their access
+         * @description You cannot change yourself. Only owners can grant the owner role or change another owner.
+         */
+        patch: operations["MembersController_update_v1"];
+        trace?: never;
+    };
+    "/api/v1/teams": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Teams in this workspace and who is on each */
+        get: operations["TeamsController_list_v1"];
+        put?: never;
+        /** Create a team */
+        post: operations["TeamsController_create_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teams/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a team; its members stay in the workspace */
+        delete: operations["TeamsController_remove_v1"];
+        options?: never;
+        head?: never;
+        /** Rename a team or change its description */
+        patch: operations["TeamsController_update_v1"];
+        trace?: never;
+    };
+    "/api/v1/teams/{id}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set exactly who is on a team */
+        put: operations["TeamsController_setMembers_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Invitations that have not been accepted, revoked or expired */
+        get: operations["InvitationsController_list_v1"];
+        put?: never;
+        /** Invite someone by email; replaces any pending invitation for them */
+        post: operations["InvitationsController_create_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invitations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Cancel a pending invitation */
+        delete: operations["InvitationsController_revoke_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invitations/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Who invited you, to which workspace, as what role */
+        get: operations["InvitationsController_preview_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invitations/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Join the workspace
+         * @description You must be signed in with the email address the invitation was sent to.
+         */
+        post: operations["InvitationsController_accept_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AuditLogPageDto: Record<string, never>;
         SignupDto: {
             /** @example Maya Chen */
             name: string;
@@ -313,6 +564,142 @@ export interface components {
             currentPassword: string;
             newPassword: string;
         };
+        RoleDto: Record<string, never>;
+        PermissionDto: Record<string, never>;
+        CreateOrganizationDto: {
+            /** @example Northstar Coffee */
+            name: string;
+            /** @enum {string} */
+            businessType?: "ecommerce" | "d2c" | "saas" | "services" | "agency" | "education" | "clinic" | "other";
+            /**
+             * @description IANA time zone used for business hours and reports.
+             * @example America/Chicago
+             */
+            timezone?: string;
+        };
+        MembershipRoleDto: {
+            key: string;
+            name: string;
+        };
+        MyOrganizationDto: {
+            /** @description Your role in this workspace. */
+            role: components["schemas"]["MembershipRoleDto"];
+            /** @description Permission keys your role grants, for showing or hiding UI. */
+            permissions: string[];
+            id: string;
+            name: string;
+            slug: string;
+            businessType: string | null;
+            timezone: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        OrganizationDto: {
+            id: string;
+            name: string;
+            slug: string;
+            businessType: string | null;
+            timezone: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        UpdateOrganizationDto: {
+            name?: string;
+            /** @enum {string} */
+            businessType?: "ecommerce" | "d2c" | "saas" | "services" | "agency" | "education" | "clinic" | "other";
+            timezone?: string;
+        };
+        MemberUserDto: {
+            id: string;
+            name: string;
+            email: string;
+            avatarUrl: string | null;
+        };
+        RoleRefDto: {
+            id: string;
+            key: string;
+            name: string;
+        };
+        TeamRefDto: {
+            id: string;
+            name: string;
+        };
+        MemberDto: {
+            id: string;
+            /** @enum {string} */
+            status: "ACTIVE" | "DISABLED";
+            displayName: string | null;
+            /** Format: date-time */
+            joinedAt: string;
+            user: components["schemas"]["MemberUserDto"];
+            role: components["schemas"]["RoleRefDto"];
+            teams: components["schemas"]["TeamRefDto"][];
+        };
+        UpdateMemberDto: {
+            /** Format: uuid */
+            roleId?: string;
+            /**
+             * @description Disabled members keep their history but cannot open the workspace.
+             * @enum {string}
+             */
+            status?: "ACTIVE" | "DISABLED";
+        };
+        TeamMemberRefDto: {
+            id: string;
+            name: string;
+        };
+        TeamDto: {
+            id: string;
+            name: string;
+            description: string | null;
+            members: components["schemas"]["TeamMemberRefDto"][];
+            /** Format: date-time */
+            createdAt: string;
+        };
+        CreateTeamDto: {
+            /** @example Customer Care */
+            name: string;
+            /** @example Orders, shipping, subscriptions and returns. */
+            description?: string;
+        };
+        UpdateTeamDto: {
+            name?: string;
+            description?: string;
+        };
+        SetTeamMembersDto: {
+            /** @description The full list of member ids; anyone not listed is removed from the team. */
+            memberIds: string[];
+        };
+        CreateInvitationDto: {
+            /**
+             * Format: email
+             * @example tom@northstarcoffee.co
+             */
+            email: string;
+            /** Format: uuid */
+            roleId: string;
+        };
+        InvitationDto: {
+            id: string;
+            email: string;
+            role: components["schemas"]["RoleRefDto"];
+            invitedBy: string | null;
+            /** Format: date-time */
+            expiresAt: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        InvitationPreviewDto: {
+            organizationName: string;
+            invitedBy: string | null;
+            email: string;
+            roleName: string;
+            /** Format: date-time */
+            expiresAt: string;
+        };
+        InvitationTokenDto: {
+            token: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -322,6 +709,25 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    AuditController_list_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditLogPageDto"];
+                };
+            };
+        };
+    };
     AuthController_signup_v1: {
         parameters: {
             query?: never;
@@ -597,6 +1003,46 @@ export interface operations {
             };
         };
     };
+    RolesController_list_v1: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleDto"][];
+                };
+            };
+        };
+    };
+    RolesController_catalog_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PermissionDto"][];
+                };
+            };
+        };
+    };
     HealthController_live_v1: {
         parameters: {
             query?: never;
@@ -628,6 +1074,395 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    OrganizationsController_listMine_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyOrganizationDto"][];
+                };
+            };
+        };
+    };
+    OrganizationsController_create_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateOrganizationDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyOrganizationDto"];
+                };
+            };
+        };
+    };
+    OrganizationsController_current_v1: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganizationDto"];
+                };
+            };
+        };
+    };
+    OrganizationsController_update_v1: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateOrganizationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganizationDto"];
+                };
+            };
+        };
+    };
+    MembersController_list_v1: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberDto"][];
+                };
+            };
+        };
+    };
+    MembersController_remove_v1: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MembersController_update_v1: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMemberDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberDto"];
+                };
+            };
+        };
+    };
+    TeamsController_list_v1: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamDto"][];
+                };
+            };
+        };
+    };
+    TeamsController_create_v1: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTeamDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamDto"];
+                };
+            };
+        };
+    };
+    TeamsController_remove_v1: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TeamsController_update_v1: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTeamDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamDto"];
+                };
+            };
+        };
+    };
+    TeamsController_setMembers_v1: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetTeamMembersDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamDto"];
+                };
+            };
+        };
+    };
+    InvitationsController_list_v1: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationDto"][];
+                };
+            };
+        };
+    };
+    InvitationsController_create_v1: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateInvitationDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationDto"];
+                };
+            };
+        };
+    };
+    InvitationsController_revoke_v1: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    InvitationsController_preview_v1: {
+        parameters: {
+            query: {
+                token: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationPreviewDto"];
+                };
+            };
+        };
+    };
+    InvitationsController_accept_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvitationTokenDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyOrganizationDto"];
+                };
             };
         };
     };
