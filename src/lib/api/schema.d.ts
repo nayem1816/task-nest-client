@@ -505,7 +505,26 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        AuditLogPageDto: Record<string, never>;
+        AuditLogDto: {
+            id: string;
+            /** @enum {string} */
+            actorType: "USER" | "SYSTEM" | "AI" | "API_KEY";
+            actorId: string | null;
+            actorLabel: string | null;
+            action: string;
+            entityType: string;
+            entityId: string | null;
+            ip: string | null;
+            metadata: {
+                [key: string]: unknown;
+            } | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AuditLogPageDto: {
+            data: components["schemas"]["AuditLogDto"][];
+            nextCursor: string | null;
+        };
         SignupDto: {
             /** @example Maya Chen */
             name: string;
@@ -564,8 +583,20 @@ export interface components {
             currentPassword: string;
             newPassword: string;
         };
-        RoleDto: Record<string, never>;
-        PermissionDto: Record<string, never>;
+        RoleDto: {
+            id: string;
+            key: string;
+            name: string;
+            description: string | null;
+            isSystem: boolean;
+            permissions: string[];
+            memberCount: number;
+        };
+        PermissionDto: {
+            /** @example conversation.reply */
+            key: string;
+            description: string;
+        };
         CreateOrganizationDto: {
             /** @example Northstar Coffee */
             name: string;
@@ -711,7 +742,14 @@ export type $defs = Record<string, never>;
 export interface operations {
     AuditController_list_v1: {
         parameters: {
-            query?: never;
+            query: {
+                limit: number;
+                /** @description `nextCursor` from the previous page. */
+                cursor?: string;
+                action?: string;
+                entityType?: string;
+                actorId?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -725,6 +763,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AuditLogPageDto"];
                 };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `audit.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -1006,9 +1051,7 @@ export interface operations {
     RolesController_list_v1: {
         parameters: {
             query?: never;
-            header: {
-                "x-organization-id": string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -1021,6 +1064,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["RoleDto"][];
                 };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `team.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -1122,9 +1172,7 @@ export interface operations {
     OrganizationsController_current_v1: {
         parameters: {
             query?: never;
-            header: {
-                "x-organization-id": string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -1138,14 +1186,19 @@ export interface operations {
                     "application/json": components["schemas"]["OrganizationDto"];
                 };
             };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: nothing extra */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     OrganizationsController_update_v1: {
         parameters: {
             query?: never;
-            header: {
-                "x-organization-id": string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -1163,14 +1216,19 @@ export interface operations {
                     "application/json": components["schemas"]["OrganizationDto"];
                 };
             };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `settings.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     MembersController_list_v1: {
         parameters: {
             query?: never;
-            header: {
-                "x-organization-id": string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -1184,14 +1242,19 @@ export interface operations {
                     "application/json": components["schemas"]["MemberDto"][];
                 };
             };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `team.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     MembersController_remove_v1: {
         parameters: {
             query?: never;
-            header: {
-                "x-organization-id": string;
-            };
+            header?: never;
             path: {
                 id: string;
             };
@@ -1205,14 +1268,19 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `team.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     MembersController_update_v1: {
         parameters: {
             query?: never;
-            header: {
-                "x-organization-id": string;
-            };
+            header?: never;
             path: {
                 id: string;
             };
@@ -1232,14 +1300,19 @@ export interface operations {
                     "application/json": components["schemas"]["MemberDto"];
                 };
             };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `team.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     TeamsController_list_v1: {
         parameters: {
             query?: never;
-            header: {
-                "x-organization-id": string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -1253,14 +1326,19 @@ export interface operations {
                     "application/json": components["schemas"]["TeamDto"][];
                 };
             };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `team.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     TeamsController_create_v1: {
         parameters: {
             query?: never;
-            header: {
-                "x-organization-id": string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -1278,14 +1356,19 @@ export interface operations {
                     "application/json": components["schemas"]["TeamDto"];
                 };
             };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `team.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     TeamsController_remove_v1: {
         parameters: {
             query?: never;
-            header: {
-                "x-organization-id": string;
-            };
+            header?: never;
             path: {
                 id: string;
             };
@@ -1299,14 +1382,19 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `team.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     TeamsController_update_v1: {
         parameters: {
             query?: never;
-            header: {
-                "x-organization-id": string;
-            };
+            header?: never;
             path: {
                 id: string;
             };
@@ -1326,14 +1414,19 @@ export interface operations {
                     "application/json": components["schemas"]["TeamDto"];
                 };
             };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `team.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     TeamsController_setMembers_v1: {
         parameters: {
             query?: never;
-            header: {
-                "x-organization-id": string;
-            };
+            header?: never;
             path: {
                 id: string;
             };
@@ -1353,14 +1446,19 @@ export interface operations {
                     "application/json": components["schemas"]["TeamDto"];
                 };
             };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `team.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     InvitationsController_list_v1: {
         parameters: {
             query?: never;
-            header: {
-                "x-organization-id": string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -1374,14 +1472,19 @@ export interface operations {
                     "application/json": components["schemas"]["InvitationDto"][];
                 };
             };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `team.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     InvitationsController_create_v1: {
         parameters: {
             query?: never;
-            header: {
-                "x-organization-id": string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -1399,14 +1502,19 @@ export interface operations {
                     "application/json": components["schemas"]["InvitationDto"];
                 };
             };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `team.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     InvitationsController_revoke_v1: {
         parameters: {
             query?: never;
-            header: {
-                "x-organization-id": string;
-            };
+            header?: never;
             path: {
                 id: string;
             };
@@ -1415,6 +1523,13 @@ export interface operations {
         requestBody?: never;
         responses: {
             204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `team.manage` */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

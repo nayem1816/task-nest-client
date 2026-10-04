@@ -1,69 +1,43 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Laptop, LogOut, Smartphone } from 'lucide-react';
+import { BadgeCheck, Laptop, Smartphone } from 'lucide-react';
+import { PageHeader } from '@/components/page/page-header';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api/client';
 import { errorMessage, unwrap } from '@/lib/api/errors';
 import { useAuth } from '@/lib/auth/auth-provider';
-import { useWorkspace } from '@/lib/workspace/workspace-provider';
 import { describeDevice, formatRelative } from './session-format';
 
-export function AccountOverview() {
-  const { state, signOut } = useAuth();
+export function AccountSettings() {
+  const { state } = useAuth();
   if (state.status !== 'authenticated') return null;
   const { user } = state;
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-10">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{user.name}</h1>
-          <p className="text-text-muted mt-1">{user.email}</p>
+    <div className="space-y-8">
+      <PageHeader title="Account" description="How you sign in, and where you're signed in." />
+
+      <dl className="border-border divide-border divide-y rounded-[10px] border">
+        <div className="flex gap-4 px-4 py-3">
+          <dt className="text-text-muted w-28 shrink-0">Name</dt>
+          <dd>{user.name}</dd>
         </div>
-        <Button variant="outline" onClick={() => void signOut()}>
-          <LogOut aria-hidden />
-          Sign out
-        </Button>
-      </div>
+        <div className="flex gap-4 px-4 py-3">
+          <dt className="text-text-muted w-28 shrink-0">Email</dt>
+          <dd className="flex items-center gap-1.5">
+            {user.email}
+            {user.emailVerified && (
+              <BadgeCheck className="text-success size-4" aria-label="Confirmed" />
+            )}
+          </dd>
+        </div>
+      </dl>
 
       {!user.emailVerified && <VerifyEmailNotice email={user.email} />}
 
-      <WorkspaceSummary />
-
       <SessionList />
-    </main>
-  );
-}
-
-function WorkspaceSummary() {
-  const { current, workspaces, switchTo } = useWorkspace();
-  if (!current) return null;
-
-  return (
-    <section className="border-border mt-8 border-t pt-6" aria-labelledby="workspace-heading">
-      <h2 id="workspace-heading" className="text-base font-semibold">
-        {current.name}
-      </h2>
-      <p className="text-text-muted mt-1 text-[13px]">
-        Your role here: {current.role.name}. The inbox and AI agent will show up in this workspace
-        as they ship.
-      </p>
-
-      {workspaces.length > 1 && (
-        <ul className="mt-4 flex flex-wrap gap-2" aria-label="Switch workspace">
-          {workspaces
-            .filter((w) => w.id !== current.id)
-            .map((w) => (
-              <li key={w.id}>
-                <Button size="sm" variant="outline" onClick={() => switchTo(w.id)}>
-                  Switch to {w.name}
-                </Button>
-              </li>
-            ))}
-        </ul>
-      )}
-    </section>
+    </div>
   );
 }
 
@@ -73,7 +47,7 @@ function VerifyEmailNotice({ email }: { email: string }) {
   });
 
   return (
-    <div className="border-warning/30 bg-warning/5 mt-6 flex flex-wrap items-center justify-between gap-3 rounded-[10px] border px-4 py-3">
+    <div className="border-warning/30 bg-warning/5 flex flex-wrap items-center justify-between gap-3 rounded-[10px] border px-4 py-3">
       <p className="text-[13px]">
         Confirm <strong>{email}</strong> to receive conversation alerts.
         {resend.isSuccess && <span className="text-text-muted"> A new link is on its way.</span>}
@@ -107,7 +81,7 @@ function SessionList() {
   });
 
   return (
-    <section className="mt-8" aria-labelledby="sessions-heading">
+    <section aria-labelledby="sessions-heading">
       <h2 id="sessions-heading" className="text-base font-semibold">
         Signed-in devices
       </h2>
