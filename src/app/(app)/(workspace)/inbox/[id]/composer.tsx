@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api/client';
 import { errorMessage, unwrap } from '@/lib/api/errors';
 import { useWorkspaceKey } from '@/lib/queries/team';
+import { useRealtime, useTypingNames } from '@/lib/realtime/realtime-provider';
+import { describeTyping } from '@/lib/realtime/typing-store';
 import { cn } from '@/lib/utils';
 
 type Mode = 'reply' | 'note';
@@ -27,6 +29,8 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(function 
 ) {
   const queryClient = useQueryClient();
   const key = useWorkspaceKey();
+  const realtime = useRealtime();
+  const typingNote = describeTyping(useTypingNames(conversationId));
   const [mode, setMode] = useState<Mode>('reply');
   // Drafts are kept per conversation while switching between them.
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -69,27 +73,32 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(function 
 
   return (
     <div className="border-border bg-surface border-t px-3 pt-2 pb-3 sm:px-4">
-      <div role="tablist" aria-label="Message type" className="mb-2 flex gap-1">
-        {(['reply', 'note'] as const).map((m) => (
-          <button
-            key={m}
-            type="button"
-            role="tab"
-            aria-selected={mode === m}
-            onClick={() => setMode(m)}
-            className={cn(
-              'flex h-7 items-center gap-1 rounded-md px-2 text-[12px] font-medium',
-              mode === m
-                ? m === 'note'
-                  ? 'bg-amber-50 text-amber-800'
-                  : 'bg-muted text-text'
-                : 'text-text-muted hover:text-text',
-            )}
-          >
-            {m === 'note' && <Lock className="size-3" aria-hidden />}
-            {m === 'reply' ? 'Reply' : 'Internal note'}
-          </button>
-        ))}
+      <div className="mb-2 flex items-center gap-2">
+        <div role="tablist" aria-label="Message type" className="flex gap-1">
+          {(['reply', 'note'] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              role="tab"
+              aria-selected={mode === m}
+              onClick={() => setMode(m)}
+              className={cn(
+                'flex h-7 items-center gap-1 rounded-md px-2 text-[12px] font-medium',
+                mode === m
+                  ? m === 'note'
+                    ? 'bg-amber-50 text-amber-800'
+                    : 'bg-muted text-text'
+                  : 'text-text-muted hover:text-text',
+              )}
+            >
+              {m === 'note' && <Lock className="size-3" aria-hidden />}
+              {m === 'reply' ? 'Reply' : 'Internal note'}
+            </button>
+          ))}
+        </div>
+        <span aria-live="polite" className="text-text-muted ml-auto truncate text-[12px]">
+          {typingNote}
+        </span>
       </div>
       <form
         onSubmit={(e) => {
@@ -104,7 +113,10 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(function 
         <textarea
           ref={textareaRef}
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => {
+            setDraft(e.target.value);
+            if (e.target.value.trim()) realtime?.sendTyping(conversationId);
+          }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
               e.preventDefault();

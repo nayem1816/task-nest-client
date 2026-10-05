@@ -25,6 +25,7 @@ import {
   useConversations,
   useInboxCounts,
 } from '@/lib/queries/inbox';
+import { useRealtime } from '@/lib/realtime/realtime-provider';
 import { useDebouncedValue } from '@/lib/use-debounced-value';
 import { cn } from '@/lib/utils';
 
@@ -56,7 +57,10 @@ export function ConversationList({ filters, onFiltersChange }: ConversationListP
     <>
       <div className="border-border space-y-2.5 border-b px-3 pt-3 pb-2.5">
         <div className="flex items-center justify-between">
-          <h1 className="text-base font-semibold">Inbox</h1>
+          <div className="flex min-w-0 items-center gap-2">
+            <h1 className="text-base font-semibold">Inbox</h1>
+            <ConnectionNote />
+          </div>
           <NativeSelect
             aria-label="Status"
             value={filters.status}
@@ -299,4 +303,29 @@ function ListPlaceholder() {
       ))}
     </div>
   );
+}
+
+/** Silent while live; says so when updates are delayed, since the list may be stale. */
+function ConnectionNote() {
+  const status = useRealtime()?.status;
+  if (status === 'reconnecting') {
+    return (
+      <span className="text-text-muted flex items-center gap-1.5 text-[12px]" role="status">
+        <span className="size-1.5 animate-pulse rounded-full bg-amber-500" aria-hidden />
+        Reconnecting…
+      </span>
+    );
+  }
+  if (status === 'paused') {
+    return (
+      <span
+        className="text-text-muted text-[12px]"
+        role="status"
+        title="New messages show up within 15 seconds instead of instantly."
+      >
+        Live updates off
+      </span>
+    );
+  }
+  return null;
 }

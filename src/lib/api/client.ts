@@ -15,6 +15,11 @@ export function setSessionLostHandler(handler: () => void): void {
   onSessionLost = handler;
 }
 
+/** For callers outside this module that find the session gone (the realtime connection). */
+export function reportSessionLost(): void {
+  onSessionLost();
+}
+
 /**
  * fetch with the access token attached. On a 401 it refreshes once and replays
  * the request; if that is not possible the session is gone and the app is told.
