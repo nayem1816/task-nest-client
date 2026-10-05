@@ -2,6 +2,7 @@ import {
   Building2,
   KeyRound,
   type LucideIcon,
+  MessagesSquare,
   ScrollText,
   UserRound,
   Users,
@@ -25,6 +26,13 @@ export const SETTINGS_SECTIONS: { label: string; items: SettingsItem[] }[] = [
         href: '/settings/workspace',
         icon: Building2,
         description: 'Name, business type and time zone',
+      },
+      {
+        label: 'Channels',
+        href: '/settings/channels',
+        icon: MessagesSquare,
+        description: 'Website chat and the other places customers reach you',
+        permission: 'channel.manage',
       },
       {
         label: 'Members',

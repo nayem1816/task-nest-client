@@ -39,7 +39,6 @@ import { ContextPanel } from './context-panel';
 import { MessageThread } from './message-thread';
 
 const DELIVERY_NOTES: Partial<Record<Conversation['channel']['type'], string>> = {
-  WEBSITE_CHAT: 'Saved here. Delivery to the visitor starts once the chat widget is installed.',
   EMAIL: 'Saved here. Email sending is not connected yet.',
 };
 
