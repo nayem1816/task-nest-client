@@ -48,3 +48,13 @@ export function formatRelative(iso: string, now = Date.now()): string {
   if (days <= 30) return `${days} days ago`;
   return formatDate(iso);
 }
+
+/** The last `count` calendar days in `timeZone`, oldest first, as YYYY-MM-DD. */
+export function lastDays(count: number, timeZone: string, now = Date.now()): string[] {
+  // en-CA formats dates as YYYY-MM-DD.
+  const format = new Intl.DateTimeFormat('en-CA', { timeZone });
+  const days = new Set<string>();
+  // Step by hours, not days, so DST changes cannot skip or repeat a date.
+  for (let t = now; days.size < count; t -= 60 * 60 * 1000) days.add(format.format(t));
+  return [...days].reverse();
+}
