@@ -1,6 +1,7 @@
 import {
   BookUser,
   House,
+  Inbox,
   type LucideIcon,
   Package,
   Settings,
@@ -31,6 +32,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     items: [
       { label: 'Home', href: '/app', icon: House },
+      { label: 'Inbox', href: '/inbox', icon: Inbox, permission: 'conversation.read' },
       { label: 'Contacts', href: '/contacts', icon: BookUser, permission: 'contact.read' },
       { label: 'Orders', href: '/orders', icon: ShoppingBag, permission: 'commerce.read' },
       { label: 'Products', href: '/products', icon: Package, permission: 'commerce.read' },
