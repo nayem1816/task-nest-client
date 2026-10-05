@@ -21,6 +21,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/ai/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Whether AI is set up on this server, and which models it uses */
+        get: operations["AiController_status_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ai/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a tiny prompt to confirm the provider answers */
+        post: operations["AiController_check_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ai/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** AI requests and tokens over the last N days (default 30) */
+        get: operations["AiController_usageSummary_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/signup": {
         parameters: {
             query?: never;
@@ -949,7 +1000,7 @@ export interface components {
         AuditLogDto: {
             id: string;
             /** @enum {string} */
-            actorType: "USER" | "SYSTEM" | "AI" | "API_KEY";
+            actorType: "AI" | "USER" | "SYSTEM" | "API_KEY";
             actorId: string | null;
             actorLabel: string | null;
             action: string;
@@ -965,6 +1016,46 @@ export interface components {
         AuditLogPageDto: {
             data: components["schemas"]["AuditLogDto"][];
             nextCursor: string | null;
+        };
+        AiStatusDto: {
+            configured: boolean;
+            /** @description Null when not configured. */
+            provider: string | null;
+            chatModel: string;
+            embeddingModel: string;
+        };
+        AiCheckDto: {
+            latencyMs: number;
+            model: string;
+            /** @description What the model answered to the test prompt. */
+            reply: string;
+        };
+        AiUsageTotalsDto: {
+            requests: number;
+            failed: number;
+            inputTokens: number;
+            outputTokens: number;
+        };
+        AiUsageByFeatureDto: {
+            requests: number;
+            failed: number;
+            inputTokens: number;
+            outputTokens: number;
+            feature: string;
+        };
+        AiUsageByDayDto: {
+            requests: number;
+            failed: number;
+            inputTokens: number;
+            outputTokens: number;
+            /** @description YYYY-MM-DD in the workspace's time zone. */
+            date: string;
+        };
+        AiUsageSummaryDto: {
+            days: number;
+            totals: components["schemas"]["AiUsageTotalsDto"];
+            byFeature: components["schemas"]["AiUsageByFeatureDto"][];
+            byDay: components["schemas"]["AiUsageByDayDto"][];
         };
         SignupDto: {
             /** @example Maya Chen */
@@ -1521,7 +1612,7 @@ export interface components {
             id: string;
             conversationId: string;
             /** @enum {string} */
-            sender: "SYSTEM" | "AI" | "CONTACT" | "MEMBER";
+            sender: "AI" | "SYSTEM" | "CONTACT" | "MEMBER";
             internal: boolean;
             body: string;
             author: components["schemas"]["MemberRefDto"] | null;
@@ -1653,6 +1744,86 @@ export interface operations {
                 };
             };
             /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `audit.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AiController_status_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiStatusDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `agent.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AiController_check_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiCheckDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `agent.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AiController_usageSummary_v1: {
+        parameters: {
+            query?: {
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiUsageSummaryDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `agent.read` */
             403: {
                 headers: {
                     [name: string]: unknown;

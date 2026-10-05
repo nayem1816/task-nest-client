@@ -1,4 +1,4 @@
-import { formatExpiry, formatRelative } from './format';
+import { formatExpiry, formatRelative, lastDays } from './format';
 
 describe('formatExpiry', () => {
   const now = Date.parse('2026-10-04T12:00:00Z');
@@ -26,5 +26,14 @@ describe('formatRelative', () => {
     ['2026-08-01T12:00:00Z', 'Aug 1, 2026'],
   ])('%s → %s', (iso, expected) => {
     expect(formatRelative(iso, now)).toBe(expected);
+  });
+});
+
+describe('lastDays', () => {
+  it('lists calendar days in the given time zone, oldest first', () => {
+    const now = Date.parse('2026-10-05T03:00:00Z');
+    expect(lastDays(3, 'UTC', now)).toEqual(['2026-10-03', '2026-10-04', '2026-10-05']);
+    // Still the 4th in Chicago.
+    expect(lastDays(2, 'America/Chicago', now)).toEqual(['2026-10-03', '2026-10-04']);
   });
 });
