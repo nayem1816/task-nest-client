@@ -34,7 +34,11 @@ export function describeActivity({ type, actorLabel, metadata }: ActivityLike): 
 
   switch (type) {
     case 'contact.created':
-      return m.source === 'manual' ? `${who} added this contact` : 'Contact created';
+      if (m.source === 'manual') return `${who} added this contact`;
+      if (m.source === 'website_chat') return 'Started a chat on the website';
+      return 'Contact created';
+    case 'contact.email_unverified':
+      return `Said their email is ${String(m.email)}, which belongs to another contact. Not linked until someone checks.`;
     case 'contact.updated': {
       const fields = list('fields').map((f) => FIELDS[f as string] ?? f);
       return `${who} updated ${joinWords(fields as string[]) || 'details'}`;

@@ -856,6 +856,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/channels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Channels connected to the workspace */
+        get: operations["ChannelsController_list_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/channels/website": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a website chat channel */
+        post: operations["ChannelsController_createWebsite_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/channels/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Rename, turn off, or change website chat settings */
+        patch: operations["ChannelsController_update_v1"];
+        trace?: never;
+    };
+    "/api/v1/widget/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start or resume a visitor session for a widget key */
+        post: operations["WidgetController_start_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/widget/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The visitor's current conversation */
+        get: operations["WidgetController_history_v1"];
+        put?: never;
+        /** Send a message as the visitor */
+        post: operations["WidgetController_send_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1380,7 +1466,7 @@ export interface components {
             id: string;
             subject: string | null;
             /** @enum {string} */
-            status: "PENDING" | "OPEN" | "RESOLVED" | "CLOSED";
+            status: "OPEN" | "PENDING" | "RESOLVED" | "CLOSED";
             /** @enum {string} */
             handler: "AI_HANDLING" | "HUMAN_HANDLING" | "AI_ESCALATED";
             /** @enum {string} */
@@ -1412,7 +1498,7 @@ export interface components {
         };
         UpdateConversationDto: {
             /** @enum {string} */
-            status?: "PENDING" | "OPEN" | "RESOLVED" | "CLOSED";
+            status?: "OPEN" | "PENDING" | "RESOLVED" | "CLOSED";
             /** @enum {string} */
             priority?: "LOW" | "NORMAL" | "HIGH" | "URGENT";
         };
@@ -1455,6 +1541,83 @@ export interface components {
             body: string;
             /** @description An internal note: visible to the team, never sent to the customer. */
             internal?: boolean;
+        };
+        WebChatSettingsDto: {
+            greeting: string;
+            /** @description Hex color of the launcher and the visitor's messages. */
+            accentColor: string;
+            /** @description Sites allowed to load the widget. Empty means any site. */
+            allowedOrigins: string[];
+            askForEmail: boolean;
+        };
+        ChannelDto: {
+            id: string;
+            /** @enum {string} */
+            type: "EMAIL" | "PHONE" | "WEBSITE_CHAT" | "TELEGRAM" | "WHATSAPP" | "MESSENGER" | "INSTAGRAM";
+            name: string;
+            /** @enum {string} */
+            status: "ACTIVE" | "DISCONNECTED" | "ERROR";
+            /** @description Website chat only: the key the install snippet uses. */
+            publicKey: string | null;
+            /** @description Website chat only. */
+            webChat: components["schemas"]["WebChatSettingsDto"] | null;
+            openConversations: number;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        CreateWebsiteChannelDto: {
+            name: string;
+        };
+        UpdateChannelDto: {
+            name?: string;
+            /**
+             * @description Turning a channel off stops new conversations; existing ones stay readable.
+             * @enum {string}
+             */
+            status?: "ACTIVE" | "DISCONNECTED";
+            greeting?: string;
+            accentColor?: string;
+            allowedOrigins?: string[];
+            askForEmail?: boolean;
+        };
+        StartWidgetSessionDto: {
+            /** @description The channel's public key from the install snippet. */
+            key: string;
+            /** @description A token from an earlier visit, to continue that visitor's chat. */
+            visitorToken?: string;
+            /** @description Origin of the page the widget is on, checked against the channel's allowed sites. */
+            pageOrigin?: string;
+        };
+        WidgetConfigDto: {
+            workspaceName: string;
+            greeting: string;
+            accentColor: string;
+            askForEmail: boolean;
+        };
+        WidgetVisitorDto: {
+            name: string | null;
+            email: string | null;
+        };
+        WidgetSessionDto: {
+            visitorToken: string;
+            config: components["schemas"]["WidgetConfigDto"];
+            visitor: components["schemas"]["WidgetVisitorDto"];
+        };
+        WidgetMessageDto: {
+            id: string;
+            /** @enum {string} */
+            from: "team" | "visitor" | "assistant";
+            /** @description First name of the teammate who replied; null for the visitor's own messages. */
+            authorName: string | null;
+            body: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        SendWidgetMessageDto: {
+            body: string;
+            name?: string;
+            /** Format: email */
+            email?: string;
         };
     };
     responses: never;
@@ -3284,6 +3447,159 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    ChannelsController_list_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelDto"][];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `channel.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ChannelsController_createWebsite_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateWebsiteChannelDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `channel.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ChannelsController_update_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateChannelDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `channel.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WidgetController_start_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StartWidgetSessionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WidgetSessionDto"];
+                };
+            };
+        };
+    };
+    WidgetController_history_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WidgetMessageDto"][];
+                };
+            };
+        };
+    };
+    WidgetController_send_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SendWidgetMessageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WidgetMessageDto"];
+                };
             };
         };
     };

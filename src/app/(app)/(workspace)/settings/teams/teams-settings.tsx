@@ -55,7 +55,7 @@ export function TeamsSettings() {
     <div className="space-y-6">
       <PageHeader
         title="Teams"
-        description="Group people by what they handle. Conversations will be routed to teams once the inbox ships."
+        description="Group people by what they handle. Conversations can be assigned to a team from the inbox."
         actions={
           canManage && (
             <Button onClick={openCreate}>

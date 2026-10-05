@@ -15,10 +15,8 @@ import { reportSessionLost } from '@/lib/api/client';
 import { refreshSession } from '@/lib/auth/refresh';
 import { getAccessToken, onAccessTokenChange } from '@/lib/auth/token-store';
 import { useWorkspace, WORKSPACES_QUERY_KEY } from '@/lib/workspace/workspace-provider';
+import { REALTIME_URL } from './realtime-url';
 import { type TypingEvent, TypingStore } from './typing-store';
-
-// Next rewrites cannot carry a WebSocket, so the socket goes straight to the API.
-const REALTIME_URL = process.env.NEXT_PUBLIC_REALTIME_URL || 'http://localhost:4100';
 
 const TYPING_SEND_INTERVAL_MS = 2_500;
 // A refresh that succeeds but is still refused points at a bug, not an expired
