@@ -993,6 +993,127 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/knowledge/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Knowledge sources, newest first */
+        get: operations["KnowledgeController_list_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/knowledge/sources/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A source with its text and the passages made from it */
+        get: operations["KnowledgeController_get_v1"];
+        put?: never;
+        post?: never;
+        /** Remove a source; the AI stops using it at once */
+        delete: operations["KnowledgeController_remove_v1"];
+        options?: never;
+        head?: never;
+        /** Rename a source, or edit a written one (re-indexes it) */
+        patch: operations["KnowledgeController_update_v1"];
+        trace?: never;
+    };
+    "/api/v1/knowledge/sources/text": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a written article */
+        post: operations["KnowledgeController_createText_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/knowledge/sources/url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a public web page */
+        post: operations["KnowledgeController_createUrl_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/knowledge/sources/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload a document */
+        post: operations["KnowledgeController_createFile_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/knowledge/sources/{id}/reindex": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Read the source again and rebuild its passages */
+        post: operations["KnowledgeController_reindex_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/knowledge/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Find the passages that best answer a question */
+        post: operations["KnowledgeController_searchKnowledge_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1709,6 +1830,85 @@ export interface components {
             name?: string;
             /** Format: email */
             email?: string;
+        };
+        KnowledgeSourceDto: {
+            id: string;
+            /** @enum {string} */
+            type: "TEXT" | "URL" | "FILE";
+            title: string;
+            url: string | null;
+            fileName: string | null;
+            /** @enum {string} */
+            status: "PENDING" | "PROCESSING" | "READY" | "FAILED";
+            /** @description Why the last indexing failed, in words for the person who added it. */
+            error: string | null;
+            chunkCount: number;
+            charCount: number;
+            /** Format: date-time */
+            lastIndexedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        KnowledgeChunkPreviewDto: {
+            position: number;
+            heading: string | null;
+            content: string;
+        };
+        KnowledgeSourceDetailDto: {
+            id: string;
+            /** @enum {string} */
+            type: "TEXT" | "URL" | "FILE";
+            title: string;
+            url: string | null;
+            fileName: string | null;
+            /** @enum {string} */
+            status: "PENDING" | "PROCESSING" | "READY" | "FAILED";
+            /** @description Why the last indexing failed, in words for the person who added it. */
+            error: string | null;
+            chunkCount: number;
+            charCount: number;
+            /** Format: date-time */
+            lastIndexedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** @description The text the AI learns from: what was written, or what was read from the page or file. */
+            content: string | null;
+            chunks: components["schemas"]["KnowledgeChunkPreviewDto"][];
+        };
+        CreateTextSourceDto: {
+            title: string;
+            content: string;
+        };
+        CreateUrlSourceDto: {
+            /** Format: uri */
+            url: string;
+            title?: string;
+        };
+        UpdateSourceDto: {
+            title?: string;
+            /** @description Written sources only. Changing it re-indexes the source. */
+            content?: string;
+        };
+        KnowledgeSearchDto: {
+            query: string;
+            limit?: number;
+        };
+        KnowledgeSearchResultDto: {
+            chunkId: string;
+            sourceId: string;
+            sourceTitle: string;
+            sourceType: string;
+            url: string | null;
+            heading: string | null;
+            content: string;
+            /** @description Cosine similarity, 0 to 1. Below ~0.5 the passage is probably not about the question. */
+            similarity: number;
+            /** @description Similarity plus a small keyword-match bonus; the order results come in. */
+            score: number;
         };
     };
     responses: never;
@@ -3771,6 +3971,273 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["WidgetMessageDto"];
                 };
+            };
+        };
+    };
+    KnowledgeController_list_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KnowledgeSourceDto"][];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `knowledge.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    KnowledgeController_get_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KnowledgeSourceDetailDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `knowledge.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    KnowledgeController_remove_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `knowledge.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    KnowledgeController_update_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSourceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KnowledgeSourceDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `knowledge.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    KnowledgeController_createText_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTextSourceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KnowledgeSourceDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `knowledge.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    KnowledgeController_createUrl_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateUrlSourceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KnowledgeSourceDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `knowledge.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    KnowledgeController_createFile_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description PDF, Word, text, Markdown or HTML, up to 10 MB
+                     */
+                    file: string;
+                    title?: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KnowledgeSourceDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `knowledge.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    KnowledgeController_reindex_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KnowledgeSourceDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `knowledge.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    KnowledgeController_searchKnowledge_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KnowledgeSearchDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KnowledgeSearchResultDto"][];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `knowledge.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

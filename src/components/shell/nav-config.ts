@@ -1,4 +1,5 @@
 import {
+  BookOpen,
   BookUser,
   House,
   Inbox,
@@ -36,6 +37,12 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: 'Contacts', href: '/contacts', icon: BookUser, permission: 'contact.read' },
       { label: 'Orders', href: '/orders', icon: ShoppingBag, permission: 'commerce.read' },
       { label: 'Products', href: '/products', icon: Package, permission: 'commerce.read' },
+    ],
+  },
+  {
+    label: 'AI',
+    items: [
+      { label: 'Knowledge', href: '/knowledge', icon: BookOpen, permission: 'knowledge.read' },
     ],
   },
   {
