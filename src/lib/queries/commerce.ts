@@ -35,7 +35,10 @@ export function useProducts(filters: { search?: string; status?: ProductStatus }
   });
 }
 
-export function useOrders(filters: { search?: string; status?: OrderStatus; contactId?: string }) {
+export function useOrders(
+  filters: { search?: string; status?: OrderStatus; contactId?: string },
+  enabled = true,
+) {
   const key = useWorkspaceKey();
   return useInfiniteQuery({
     queryKey: key('orders', 'list', JSON.stringify(filters)),
@@ -56,6 +59,7 @@ export function useOrders(filters: { search?: string; status?: OrderStatus; cont
       ),
     getNextPageParam: (last) => last.nextCursor ?? undefined,
     placeholderData: (previous) => previous,
+    enabled,
   });
 }
 

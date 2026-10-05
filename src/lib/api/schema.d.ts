@@ -733,6 +733,129 @@ export interface paths {
         patch: operations["OrdersController_update_v1"];
         trace?: never;
     };
+    "/api/v1/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Conversations, most recent activity first, with filters */
+        get: operations["ConversationsController_list_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/conversations/counts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** How many open conversations are in each inbox view */
+        get: operations["ConversationsController_counts_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/conversations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ConversationsController_get_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change status or priority; status changes are noted in the thread */
+        patch: operations["ConversationsController_update_v1"];
+        trace?: never;
+    };
+    "/api/v1/conversations/{id}/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assign to a member and/or team, or unassign with null */
+        post: operations["ConversationsController_assign_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/conversations/{id}/tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set exactly which tags a conversation has */
+        put: operations["ConversationsController_setTags_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/conversations/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark everything in the conversation as read for you */
+        post: operations["ConversationsController_markRead_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/conversations/{id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Messages and notes, a page at a time going back in time */
+        get: operations["ConversationsController_listMessages_v1"];
+        put?: never;
+        /**
+         * Reply to the customer, or add an internal note
+         * @description A reply takes the conversation over from the AI, reopens it if resolved, and assigns it to you if nobody had it.
+         */
+        post: operations["ConversationsController_send_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1235,6 +1358,103 @@ export interface components {
             trackingNumber?: string | null;
             /** @example 2026-10-08 */
             estimatedDelivery?: string | null;
+        };
+        ChannelRefDto: {
+            id: string;
+            /** @enum {string} */
+            type: "EMAIL" | "PHONE" | "WEBSITE_CHAT" | "TELEGRAM" | "WHATSAPP" | "MESSENGER" | "INSTAGRAM";
+            name: string;
+        };
+        ConversationContactDto: {
+            id: string;
+            displayName: string;
+            email: string | null;
+            /** @enum {string} */
+            stage: "VISITOR" | "LEAD" | "CUSTOMER";
+        };
+        MemberRefDto: {
+            id: string;
+            name: string;
+        };
+        ConversationDto: {
+            id: string;
+            subject: string | null;
+            /** @enum {string} */
+            status: "PENDING" | "OPEN" | "RESOLVED" | "CLOSED";
+            /** @enum {string} */
+            handler: "AI_HANDLING" | "HUMAN_HANDLING" | "AI_ESCALATED";
+            /** @enum {string} */
+            priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
+            escalationReason: string | null;
+            channel: components["schemas"]["ChannelRefDto"];
+            contact: components["schemas"]["ConversationContactDto"];
+            assignee: components["schemas"]["MemberRefDto"] | null;
+            team: components["schemas"]["TeamRefDto"] | null;
+            tags: components["schemas"]["TagDto"][];
+            /** Format: date-time */
+            lastMessageAt: string;
+            lastMessagePreview: string | null;
+            /** @description Customer messages you have not read yet. */
+            unreadCount: number;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        ConversationPageDto: {
+            data: components["schemas"]["ConversationDto"][];
+            nextCursor: string | null;
+        };
+        InboxCountsDto: {
+            /** @description Open or pending, in each view. */
+            all: number;
+            mine: number;
+            unassigned: number;
+            team: number;
+        };
+        UpdateConversationDto: {
+            /** @enum {string} */
+            status?: "PENDING" | "OPEN" | "RESOLVED" | "CLOSED";
+            /** @enum {string} */
+            priority?: "LOW" | "NORMAL" | "HIGH" | "URGENT";
+        };
+        AssignConversationDto: {
+            /**
+             * Format: uuid
+             * @description Member id, or null to unassign.
+             */
+            assigneeId: string | null;
+            /**
+             * Format: uuid
+             * @description Team id, or null to clear. Omit to leave the team unchanged.
+             */
+            teamId?: string | null;
+        };
+        SetConversationTagsDto: {
+            tagIds: string[];
+        };
+        MessageDto: {
+            id: string;
+            conversationId: string;
+            /** @enum {string} */
+            sender: "SYSTEM" | "AI" | "CONTACT" | "MEMBER";
+            internal: boolean;
+            body: string;
+            author: components["schemas"]["MemberRefDto"] | null;
+            metadata: {
+                [key: string]: unknown;
+            } | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        MessagePageDto: {
+            /** @description Oldest first, ready to render top to bottom. */
+            data: components["schemas"]["MessageDto"][];
+            /** @description Pass as `before` to load the page above, or null at the start of the conversation. */
+            nextBefore: string | null;
+        };
+        SendMessageDto: {
+            body: string;
+            /** @description An internal note: visible to the team, never sent to the customer. */
+            internal?: boolean;
         };
     };
     responses: never;
@@ -2774,6 +2994,291 @@ export interface operations {
                 };
             };
             /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `commerce.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ConversationsController_list_v1: {
+        parameters: {
+            query: {
+                /** @description Whose conversations: everyone's, yours, nobody's, or your teams'. */
+                view: "all" | "mine" | "unassigned" | "team";
+                /** @description "open" means OPEN or PENDING. */
+                status: "open" | "all" | "OPEN" | "PENDING" | "RESOLVED" | "CLOSED";
+                handler?: "AI_HANDLING" | "HUMAN_HANDLING" | "AI_ESCALATED";
+                /** @description "high" matches HIGH and URGENT. */
+                priority?: "high";
+                /** @description Filter by the contact's lifecycle stage (leads, customers). */
+                stage?: "VISITOR" | "LEAD" | "CUSTOMER";
+                channelId?: string;
+                tagId?: string;
+                contactId?: string;
+                /** @description Only conversations with customer messages you have not read. */
+                unread?: boolean;
+                search?: string;
+                /** @description `nextCursor` from the previous page. Opaque. */
+                cursor?: string;
+                limit: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationPageDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `conversation.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ConversationsController_counts_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboxCountsDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `conversation.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ConversationsController_get_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `conversation.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ConversationsController_update_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateConversationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `conversation.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ConversationsController_assign_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignConversationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `conversation.assign` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ConversationsController_setTags_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetConversationTagsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `conversation.manage` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ConversationsController_markRead_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `conversation.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ConversationsController_listMessages_v1: {
+        parameters: {
+            query: {
+                /** @description Load messages older than this message id. */
+                before?: string;
+                limit: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessagePageDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `conversation.read` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ConversationsController_send_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SendMessageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageDto"];
+                };
+            };
+            /** @description `ORGANIZATION_ACCESS_DENIED`, or `PERMISSION_DENIED` when the role lacks: `conversation.reply` */
             403: {
                 headers: {
                     [name: string]: unknown;
