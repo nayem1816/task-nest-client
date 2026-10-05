@@ -34,6 +34,7 @@ interface ServerEvents {
   'message.created': (e: { conversationId: string; sender: string; internal: boolean }) => void;
   'conversation.updated': (e: { conversationId: string; changes: string[] }) => void;
   typing: (e: TypingEvent) => void;
+  'knowledge.source.updated': (e: { sourceId: string; status: string }) => void;
 }
 
 interface ClientEvents {
@@ -150,6 +151,10 @@ function RealtimeConnection({
       invalidate('conversation', e.conversationId);
       invalidate('list');
       invalidate('counts');
+    });
+
+    socket.on('knowledge.source.updated', () => {
+      void queryClient.invalidateQueries({ queryKey: [workspaceId, 'knowledge'] });
     });
 
     socket.on('typing', (e) => {
